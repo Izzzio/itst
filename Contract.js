@@ -37,41 +37,180 @@ class factoryContract extends Contract {
         this._completedContracts = new BlockchainMap('_completedContracts');
     }
 
+
     static _createContractKey(perfomerId, customerId, contractId) {
         return perfomerId + '_' + customerId + '_' + contractId;
     }
 
+
     getActiveContracts(perfomerId, customerId, contractId) {
         let contractKey = this._createContractKey(perfomerId, customerId, contractId);
-        assert.assert(
-            this._activeContracts[contractKey] !== 0,
-            "Contract with this parameters doesn't exist or already completed");
+        assert.true(this._activeContracts[contractKey], "Contract with this parameters doesn't exist or already completed");
+
         return this._activeContracts[contractKey];
     }
 
+
     getCompletedContracts(perfomerId, customerId, contractId) {
         let contractKey = this._createContractKey(perfomerId, customerId, contractId);
-        assert.assert(
-            this._completedContracts[contractKey] !== 0,
-            "Contract with this parameters doesn't exist or isn't yet complete");
+        assert.true(this._completedContracts[contractKey], "Contract with this parameters doesn't exist or isn't yet complete");
+
         return this._completedContracts[contractKey];
     }
+
 
     _addPerfomer(perfomerId, perfomerInfo) {
         this._perfomerList[perfomerId] = perfomerInfo;
     }
 
+
     removePerfomer(perfomerId) {
-        delete this._perfomerList[perfomerId];
+        this._perfomerList[perfomerId] = undefined;
     }
+
 
     _addCustomer(customerId, customerInfo) {
         this._customerList[customerId] = customerInfo;
     }
 
+
     removeCustomer(customerId) {
-        delete this._customerList[customerId];
+        this._customerList[customerId] = undefined;
+    }
+
+
+    newContractWithNewCustomerAndPerformer(
+        perfomerId,
+        perfomerInfo,
+        customerId,
+        customerInfo,
+        contractId,
+        infoFromOrderCONSTANT,
+        infoFromOrderEDIT,
+        infoFromOfferCONCTANT,
+        infoFromOfferEDIT
+    ) {
+        let contractKey = this._createContractKey(perfomerId, customerId, contractId);
+        if (this._activeContracts[contractKey] || this._completedContracts[contractKey]) {
+            assert.true(false, "Contract with such parameters(perfomerId, customerId, contractId) is already exist");
+        }
+
+        this._addPerfomer(perfomerId, perfomerInfo);
+        this._addCustomer(customerId, customerInfo);
+
+        let newAgreement = new agreementContract(
+            this._perfomerList[perfomerId],
+            this._customerList[customerId],
+            infoFromOrderCONSTANT,
+            infoFromOrderEDIT,
+            infoFromOfferCONCTANT,
+            infoFromOfferEDIT
+        );
+        this._activeContracts[contractKey] = newAgreement;
+
+        return newAgreement;
+    }
+
+
+    newContractWithNewPerformer(
+        perfomerId,
+        perfomerInfo,
+        customerId,
+        contractId,
+        infoFromOrderCONSTANT,
+        infoFromOrderEDIT,
+        infoFromOfferCONCTANT,
+        infoFromOfferEDIT
+    ) {
+        let contractKey = this._createContractKey(perfomerId, customerId, contractId);
+        if (this._activeContracts[contractKey] || this._completedContracts[contractKey]) {
+            assert.true(false, "Contract with such parameters(perfomerId, customerId, contractId) is already exist");
+        }
+        this._addPerfomer(perfomerId, perfomerInfo);
+
+        let newAgreement = new agreementContract(
+            this._perfomerList[perfomerId],
+            this._customerList[customerId],
+            infoFromOrderCONSTANT,
+            infoFromOrderEDIT,
+            infoFromOfferCONCTANT,
+            infoFromOfferEDIT
+        );
+        this._activeContracts[contractKey] = newAgreement;
+
+        return newAgreement;
+    }
+
+
+    newContractWithNewCustomer(
+        perfomerId,
+        customerId,
+        customerInfo,
+        contractId,
+        infoFromOrderCONSTANT,
+        infoFromOrderEDIT,
+        infoFromOfferCONCTANT,
+        infoFromOfferEDIT
+    ) {
+        let contractKey = this._createContractKey(perfomerId, customerId, contractId);
+        if (this._activeContracts[contractKey] || this._completedContracts[contractKey]) {
+            assert.true(false, "Contract with such parameters(perfomerId, customerId, contractId) is already exist");
+        }
+        this._addCustomer(customerId, customerInfo);
+        let newAgreement = new agreementContract(
+            this._perfomerList[perfomerId],
+            this._customerList[customerId],
+            infoFromOrderCONSTANT,
+            infoFromOrderEDIT,
+            infoFromOfferCONCTANT,
+            infoFromOfferEDIT
+        );
+        this._activeContracts[contractKey] = newAgreement;
+
+        return newAgreement;
+    }
+
+
+    newContractOnly(
+        perfomerId,
+        customerId,
+        contractId,
+        infoFromOrderCONSTANT,
+        infoFromOrderEDIT,
+        infoFromOfferCONCTANT,
+        infoFromOfferEDIT
+    ) {
+        let contractKey = this._createContractKey(perfomerId, customerId, contractId);
+        if(this._activeContracts[contractKey] || this._completedContracts[contractKey]) {
+            assert.true(false, "Contract with such parameters(perfomerId, customerId, contractId) is already exist");
+        }
+        let newAgreement = new agreementContract(
+            this._perfomerList[perfomerId],
+            this._customerList[customerId],
+            infoFromOrderCONSTANT,
+            infoFromOrderEDIT,
+            infoFromOfferCONCTANT,
+            infoFromOfferEDIT
+        );
+        this._activeContracts[contractKey] = newAgreement;
+
+        return newAgreement;
+    }
+}
+
+class agreementContract {
+
+    init(perfomer, customer, orderCONST, orderEDIT, offerCONST, offerEDIT) {
+        this.contractCompleted = false;
+        this.perfomerInfo = perfomer;
+        this.customerInfo = customer;
+        this.infoFromOrderCONSTANT = orderCONST;
+        this.infoFromOrderEDIT = orderEDIT;
+        this.infoFromOfferCONCTANT = offerCONST;
+        this.infoFromOfferEDIT = offerEDIT;
+        //factory = msg.sender;
     }
 }
 
 global.registerContract(factoryContract);
+global.registerContract(agreementContract);
