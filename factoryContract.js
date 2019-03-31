@@ -71,6 +71,20 @@ class factoryContract extends Contract {
     }
 
 
+    /**
+     * Returns caller
+     * @return {*}
+     * @private
+     */
+    _getSender() {
+        if (contracts.isChild()) {
+            return String(contracts.caller());
+        }
+
+        return String(global.getState().from);
+    };
+
+
     removeCustomer(customerId) {
         this._customerList[customerId] = undefined;
     }
@@ -218,7 +232,10 @@ class factoryContract extends Contract {
     completeTheContract(perfomerId, customerId, contractId) {
         let contractKey = this._createContractKey(perfomerId, customerId, contractId);
         assert.true(this._activeContracts[contractKey], "Contract with this parameters(perfomerId, customerId, contractId) doesn't exist or already completed");
-        this._activeContracts[contractKey].contractIsCompleted();
+
+        let from = this._getSender();
+        this._activeContracts[contractKey].contractIsCompleted(from);
+
         this._completedContracts[contractKey] = this._activeContracts[contractKey];
         this._activeContracts[contractKey] = undefined;
     }
@@ -234,10 +251,6 @@ let agreementContract = {
         infoFromOfferCONCTANT: '',
         infoFromOfferEDIT: '',
     },
-
-
-    //factory = msg.sender;
-
 
     create: function(perfomer, customer, orderCONST, orderEDIT, offerCONST, offerEDIT){
         this.contractParams.contractCompleted = false;
@@ -258,9 +271,9 @@ let agreementContract = {
         assert.false(this.contractParams.contractCompleted, "contract already completed");
         this.contractParams.infoFromOfferEDIT = newInfoFromOfferEDIT;
     },
-    contractIsCompleted: function() {
+    contractIsCompleted: function(from) {
         assert.false(this.contractParams.contractCompleted, "contract already completed");
-        require(msg.sender == factory, "Only Factory can call this function");
+        assert.true('factoryContract' == from, "Only Factory can call this function");
         this.contractParams.contractCompleted = true;
     }
 };
