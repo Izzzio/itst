@@ -53,7 +53,9 @@ class factoryContract extends Contract {
 
 
     _addPerfomer(perfomerId, perfomerInfo) {
-        this._perfomerList[perfomerId] = perfomerInfo;
+        this._perfomerList[perfomerId] = {
+            perfomerInfo: perfomerInfo,
+        };
     }
 
 
@@ -63,7 +65,9 @@ class factoryContract extends Contract {
 
 
     _addCustomer(customerId, customerInfo) {
-        this._customerList[customerId] = customerInfo;
+        this._customerList[customerId] = {
+            customerInfo: customerInfo,
+        };
     }
 
 
@@ -228,7 +232,7 @@ let agreementContract = {
         infoFromOrderCONSTANT: '',
         infoFromOrderEDIT: '',
         infoFromOfferCONCTANT: '',
-        infoFromOfferEDIT: ''
+        infoFromOfferEDIT: '',
     },
 
 
