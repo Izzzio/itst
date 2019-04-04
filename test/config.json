@@ -29,7 +29,7 @@
     "enabled": true,
     "allowDebugMessages": true,
     "contractInstanceCacheLifetime": 10000,
-    "masterContract": 1
+    "masterContract": 5
   },
   "signFunction": "NEWRSA"
 }

@@ -81,14 +81,112 @@ class App extends DApp {
 
         let lastBalance = Number(await mainToken.balanceOf(this.getCurrentWallet().id));
 
-        let result = JSON.parse(await that.contracts.ecmaPromise.callMethodRollback(newBlock.address, 'getActiveContract', [1, 1, 1], {}));
+        let perfomerId = 'perfId-1';
+        let perfomerInfo = {name: 'perfomer Name', age: 10, status: 'active'};
+        let customerId = 'custId-1';
+        let customerInfo = {name: 'customer Name', age: 18, status: 'new'};
+        let contractId = '1111112222233333444444';
+        let infoFromOrderCONSTANT = '';
+        let infoFromOrderEDIT = '';
+        let infoFromOfferCONCTANT = '';
+        let infoFromOfferEDIT = '';
+        let newContract = {};
 
 
-        console.log(result);
+       newContract = JSON.parse(
+            await that.contracts.ecmaPromise.callMethodRollback(
+            newBlock.address,
+            'newContractWithNewCustomerAndPerformer',
+            [
+                perfomerId,
+                perfomerInfo,
+                customerId,
+                customerInfo,
+                contractId,
+                infoFromOrderCONSTANT,
+                infoFromOrderEDIT,
+                infoFromOfferCONCTANT,
+                infoFromOfferEDIT
+            ],
+            {}
+            )
+        );
+        assert.false(newContract.contractParams.contractCompleted, 'Error create new agreement contract with new customer and new performer');
+        assert.assert(newContract.contractParams.customerInfo.length != 0, 'Error create new agreement contract(with customer and performer): customer not exist');
 
 
-        assert.true(result.results.first === 0 && result.results.second === 0 && result.results.third === 0, 'Invalid empty vote results');
-        assert.true(result.state === 'waiting', 'Invalid empty vote state');
+        newContract = JSON.parse(
+            await that.contracts.ecmaPromise.callMethodRollback(
+                newBlock.address,
+                'newContractWithNewPerformer',
+                [
+                    perfomerId,
+                    perfomerInfo,
+                    customerId,
+                    contractId,
+                    infoFromOrderCONSTANT,
+                    infoFromOrderEDIT,
+                    infoFromOfferCONCTANT,
+                    infoFromOfferEDIT
+                ],
+                {}
+            )
+        );
+        assert.false(newContract.contractParams.contractCompleted, 'Error create new agreement contract with new performer');
+        assert.assert(newContract.contractParams.customerInfo.length != 0, 'Error create new agreement contract(with performer only): customer not exist');
+
+
+        newContract = JSON.parse(
+            await that.contracts.ecmaPromise.callMethodRollback(
+                newBlock.address,
+                'newContractWithNewCustomer',
+                [
+                    perfomerId,
+                    customerId,
+                    customerInfo,
+                    contractId,
+                    infoFromOrderCONSTANT,
+                    infoFromOrderEDIT,
+                    infoFromOfferCONCTANT,
+                    infoFromOfferEDIT
+                ],
+                {}
+            )
+        );
+        assert.false(newContract.contractParams.contractCompleted, 'Error create new agreement contract with new customer');
+        assert.assert(newContract.contractParams.customerInfo.length != 0, 'Error create new agreement contract(with customer only): customer not exist');
+
+
+        newContract = JSON.parse(
+            await that.contracts.ecmaPromise.callMethodRollback(
+                newBlock.address,
+                'newContractOnly',
+                [
+                    perfomerId,
+                    customerId,
+                    contractId,
+                    infoFromOrderCONSTANT,
+                    infoFromOrderEDIT,
+                    infoFromOfferCONCTANT,
+                    infoFromOfferEDIT
+                ],
+                {}
+            )
+        );
+        assert.false(newContract.contractParams.contractCompleted, 'Error create new agreement contract');
+        assert.assert(newContract.contractParams.customerInfo.length != 0, 'Error create new agreement contract(contract only): customer not exist');
+
+
+
+
+
+        throw('To be continue......');
+
+
+
+
+
+
 
         result = await that.contracts.ecmaPromise.deployMethod(newBlock.address, "startVoting", [], {});
 

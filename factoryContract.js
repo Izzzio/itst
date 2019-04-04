@@ -31,7 +31,7 @@ class factoryContract extends Contract {
     }
 
 
-    static _createContractKey(perfomerId, customerId, contractId) {
+    _createContractKey(perfomerId, customerId, contractId) {
         return perfomerId + '_' + customerId + '_' + contractId;
     }
 
@@ -105,7 +105,7 @@ class factoryContract extends Contract {
         );
         this._activeContracts[contractKey] = newAgreement;
 
-        return newAgreement;
+        return JSON.stringify(newAgreement);
     }
 
 
@@ -136,7 +136,7 @@ class factoryContract extends Contract {
         );
         this._activeContracts[contractKey] = newAgreement;
 
-        return newAgreement;
+        return JSON.stringify(newAgreement);
     }
 
 
@@ -167,7 +167,7 @@ class factoryContract extends Contract {
         );
         this._activeContracts[contractKey] = newAgreement;
 
-        return newAgreement;
+        return JSON.stringify(newAgreement);
     }
 
 
@@ -195,7 +195,7 @@ class factoryContract extends Contract {
         );
         this._activeContracts[contractKey] = newAgreement;
 
-        return newAgreement;
+        return JSON.stringify(newAgreement);
     }
 
 
@@ -237,8 +237,12 @@ let agreementContract = {
 
     create: function(perfomer, customer, orderCONST, orderEDIT, offerCONST, offerEDIT){
         this.contractParams.contractCompleted = false;
-        this.contractParams.perfomerInfo = perfomer;
-        this.contractParams.customerInfo = customer;
+        if(perfomer && perfomer.perfomerInfo){
+            this.contractParams.perfomerInfo = perfomer.perfomerInfo;
+        }
+        if(customer && customer.customerInfo){
+            this.contractParams.customerInfo = customer.customerInfo;
+        }
         this.contractParams.infoFromOrderCONSTANT = orderCONST;
         this.contractParams.infoFromOrderEDIT = orderEDIT;
         this.contractParams.infoFromOfferCONCTANT = offerCONST;
