@@ -24,7 +24,7 @@
   "walletFile": "./temp/wallet.json",
   "walletsDB": "mem://wallets.json",
   "blocksDB": "mem://blocks.json",
-  "appEntry": "./test/test.js",
+  "appEntry": "./itst/test/test.js",
   "ecmaContract": {
     "enabled": true,
     "allowDebugMessages": true,
