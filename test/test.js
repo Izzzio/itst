@@ -77,7 +77,7 @@ class App extends DApp {
     async factoryContractTest() {
         let mainToken = new TokenContractConnector(that.ecmaContract, that.getMasterContractAddress());
         const factoryContractCode = fs.readFileSync('factoryContract.js').toString();
-        const newBlock = await that.contracts.ecmaPromise.deployContract(factoryContractCode, 0);
+        const newBlock = await that.contracts.ecmaPromise.deployContract(factoryContractCode, 10);
 
         let lastBalance = Number(await mainToken.balanceOf(this.getCurrentWallet().id));
 
@@ -91,28 +91,6 @@ class App extends DApp {
         let infoFromOfferCONCTANT = '';
         let infoFromOfferEDIT = '';
         let newContract = {};
-
-
-       newContract = JSON.parse(
-            await that.contracts.ecmaPromise.callMethodRollback(
-            newBlock.address,
-            'newContractWithNewCustomerAndPerformer',
-            [
-                perfomerId,
-                perfomerInfo,
-                customerId,
-                customerInfo,
-                contractId,
-                infoFromOrderCONSTANT,
-                infoFromOrderEDIT,
-                infoFromOfferCONCTANT,
-                infoFromOfferEDIT
-            ],
-            {}
-            )
-        );
-        assert.false(newContract.contractParams.contractCompleted, 'Error create new agreement contract with new customer and new performer');
-        assert.assert(newContract.contractParams.customerInfo.length != 0, 'Error create new agreement contract(with customer and performer): customer not exist');
 
 
         newContract = JSON.parse(
@@ -133,7 +111,7 @@ class App extends DApp {
             )
         );
         assert.false(newContract.contractParams.contractCompleted, 'Error create new agreement contract with new performer');
-        assert.assert(newContract.contractParams.customerInfo.length != 0, 'Error create new agreement contract(with performer only): customer not exist');
+        assert.assert(newContract.contractParams.perfomerInfo.length != 0, 'Error create new agreement contract(with performer only): performer not exist');
 
 
         newContract = JSON.parse(
@@ -173,35 +151,117 @@ class App extends DApp {
                 {}
             )
         );
-        assert.false(newContract.contractParams.contractCompleted, 'Error create new agreement contract');
-        assert.assert(newContract.contractParams.customerInfo.length != 0, 'Error create new agreement contract(contract only): customer not exist');
+        assert.false(newContract.contractParams.contractCompleted, 'Error create new agreement contract(only contract)');
 
 
+        await that.contracts.ecmaPromise.deployMethod(
+            newBlock.address,
+            'newContractWithNewCustomerAndPerformer',
+            [
+                perfomerId,
+                perfomerInfo,
+                customerId,
+                customerInfo,
+                contractId,
+                infoFromOrderCONSTANT,
+                infoFromOrderEDIT,
+                infoFromOfferCONCTANT,
+                infoFromOfferEDIT
+            ],
+            {}
+        );
+        let сontractActive = JSON.parse(
+            await that.contracts.ecmaPromise.callMethodRollback(
+                newBlock.address,
+                "getActiveContract",
+                [
+                    perfomerId,
+                    customerId,
+                    contractId,
+                ],
+                {}
+            )
+        );
+
+        assert.false(сontractActive.contractParams.contractCompleted, 'Agreement contract exist and active, but already completed and should be in completed group.');
 
 
-
-        throw('To be continue......');
-
-
-
-
-
-
-
-        result = await that.contracts.ecmaPromise.deployMethod(newBlock.address, "startVoting", [], {});
-
-        result = JSON.parse(await that.contracts.ecmaPromise.callMethodRollback(newBlock.address, 'getResultsOfVoting', [], {}));
-        assert.true(result.state === 'started', 'Invalid empty vote state');
-
-        await mainToken.pay(newBlock.address, "processPayment", '1', ['1']);
-
-        assert.true(lastBalance === Number(await mainToken.balanceOf(this.getCurrentWallet().id)), "Invalid balance change");
+        let newInfoFromOrderEDIT = {'new_info': 'order new info'};
+        let contractChanged = JSON.parse(
+            await that.contracts.ecmaPromise.callMethodRollback(
+                newBlock.address,
+                'changeInfoFromOrderEDIT',
+                [
+                    perfomerId,
+                    customerId,
+                    contractId,
+                    newInfoFromOrderEDIT,
+                ],
+                {}
+            )
+        );
+        assert.true(newInfoFromOrderEDIT.new_info === contractChanged.contractParams.infoFromOrderEDIT.new_info , 'Error update value for key infoFromOrderEDIT.');
 
 
-        result = JSON.parse(await that.contracts.ecmaPromise.callMethodRollback(newBlock.address, 'getResultsOfVoting', [], {}));
-        assert.true(result.results.first === 0 && result.results.second === 1 && result.results.third === 0, 'Invalid empty vote results');
-        assert.true(result.state === 'ended', 'Invalid empty vote state');
+        let newInfoFromOfferEDIT = {'new_info': 'offer new info'};
+        contractChanged = JSON.parse(
+            await that.contracts.ecmaPromise.callMethodRollback(
+                newBlock.address,
+                'changeInfoFromOfferEDIT',
+                [
+                    perfomerId,
+                    customerId,
+                    contractId,
+                    newInfoFromOfferEDIT,
+                ],
+                {}
+            )
+        );
+        assert.true(newInfoFromOfferEDIT.new_info === contractChanged.contractParams.infoFromOfferEDIT.new_info , 'Error update value for key infoFromOfferEDIT.');
 
+
+        await that.contracts.ecmaPromise.deployMethod(
+            newBlock.address,
+            'completeTheContract',
+            [
+                perfomerId,
+                customerId,
+                contractId,
+            ],
+            {}
+        );
+
+        let сontractCompleted = JSON.parse(
+            await that.contracts.ecmaPromise.callMethodRollback(
+                newBlock.address,
+                "getCompletedContract",
+                [
+                    perfomerId,
+                    customerId,
+                    contractId,
+                ],
+                {}
+            )
+        );
+        assert.true(сontractCompleted.contractParams.contractCompleted, 'Error set contract completed');
+
+
+        await that.contracts.ecmaPromise.deployMethod(
+            newBlock.address,
+            'removePerfomer',
+            [
+                perfomerId,
+            ],
+            {}
+        );
+        await that.contracts.ecmaPromise.deployMethod(
+            newBlock.address,
+            'removeCustomer',
+            [
+                customerId,
+            ],
+            {}
+        );
     }
 
 

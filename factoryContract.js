@@ -40,7 +40,7 @@ class factoryContract extends Contract {
         let contractKey = this._createContractKey(perfomerId, customerId, contractId);
         assert.true(this._activeContracts[contractKey], "Contract with this parameters doesn't exist or already completed");
 
-        return this._activeContracts[contractKey];
+        return JSON.stringify(this._activeContracts[contractKey]);
     }
 
 
@@ -48,7 +48,7 @@ class factoryContract extends Contract {
         let contractKey = this._createContractKey(perfomerId, customerId, contractId);
         assert.true(this._completedContracts[contractKey], "Contract with this parameters doesn't exist or isn't yet complete");
 
-        return this._completedContracts[contractKey];
+        return JSON.stringify(this._completedContracts[contractKey]);
     }
 
 
@@ -202,25 +202,42 @@ class factoryContract extends Contract {
     changeInfoFromOrderEDIT(perfomerId, customerId, contractId, newInfoFromOrderEDIT) {
         let contractKey = this._createContractKey(perfomerId, customerId, contractId);
         assert.true(this._activeContracts[contractKey], "Contract with this parameters(perfomerId, customerId, contractId) doesn't exist or already completed");
+        assert.false(this._activeContracts[contractKey].contractParams.contractCompleted, "Contract already completed");
 
-        return this._activeContracts[contractKey].changeInfoFromOrderEDIT(newInfoFromOrderEDIT);
+        let activeContract = this._activeContracts[contractKey];
+        activeContract.contractParams.infoFromOrderEDIT = newInfoFromOrderEDIT;
+        this._activeContracts[contractKey] = activeContract;
+
+        return JSON.stringify(this._activeContracts[contractKey]);
     }
 
 
     changeInfoFromOfferEDIT(perfomerId, customerId, contractId, newInfoFromOfferEDIT) {
         let contractKey = this._createContractKey(perfomerId, customerId, contractId);
         assert.true(this._activeContracts[contractKey], "Contract with this parameters(perfomerId, customerId, contractId) doesn't exist or already completed");
+        assert.false(this._activeContracts[contractKey].contractParams.contractCompleted, "Contract already completed");
 
-        return this._activeContracts[contractKey].changeInfoFromOfferEDIT(newInfoFromOfferEDIT);
+        let activeContract = this._activeContracts[contractKey];
+        activeContract.contractParams.infoFromOfferEDIT = newInfoFromOfferEDIT;
+        this._activeContracts[contractKey] = activeContract;
+
+        return JSON.stringify(this._activeContracts[contractKey]);
     }
 
 
     completeTheContract(perfomerId, customerId, contractId) {
         let contractKey = this._createContractKey(perfomerId, customerId, contractId);
         assert.true(this._activeContracts[contractKey], "Contract with this parameters(perfomerId, customerId, contractId) doesn't exist or already completed");
-        this._activeContracts[contractKey].contractIsCompleted();
+        assert.false(this._activeContracts[contractKey].contractParams.contractCompleted, "Contract already completed");
+
+        let activeContract = this._activeContracts[contractKey];
+        activeContract.contractParams.contractCompleted = true;
+        this._activeContracts[contractKey] = activeContract;
+
         this._completedContracts[contractKey] = this._activeContracts[contractKey];
         this._activeContracts[contractKey] = undefined;
+
+        return JSON.stringify(this._completedContracts[contractKey]);
     }
 }
 
@@ -249,18 +266,6 @@ let agreementContract = {
         this.contractParams.infoFromOfferEDIT = offerEDIT;
 
         return this;
-    },
-    changeInfoFromOrderEDIT: function (newInfoFromOrderEDIT) {
-        assert.false(this.contractParams.contractCompleted, "contract already completed");
-        this.contractParams.infoFromOrderEDIT = newInfoFromOrderEDIT;
-    },
-    changeInfoFromOfferEDIT: function(newInfoFromOfferEDIT) {
-        assert.false(this.contractParams.contractCompleted, "contract already completed");
-        this.contractParams.infoFromOfferEDIT = newInfoFromOfferEDIT;
-    },
-    contractIsCompleted: function() {
-        assert.false(this.contractParams.contractCompleted, "contract already completed");
-        this.contractParams.contractCompleted = true;
     }
 };
 
