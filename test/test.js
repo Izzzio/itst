@@ -74,7 +74,7 @@ class App extends DApp {
      */
     async factoryContractTest() {
 
-        const factoryContractCode = fs.readFileSync('factoryContract.js').toString();
+        const factoryContractCode = fs.readFileSync('../factoryContract.js').toString();
         const newBlock = await that.contracts.ecmaPromise.deployContract(factoryContractCode, 10);
 
 
