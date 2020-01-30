@@ -20,14 +20,72 @@
 /**
  * Factory contract
  */
-class factoryContract extends Contract {
+class factoryContract extends TokenContract {
 
-    constructor() {
-        super();
+    init() {
+        super.init(0, true); //Initialize mintable token
         this._perfomerList = new BlockchainMap('_perfomerList');
         this._customerList = new BlockchainMap('_customerList');
         this._activeContracts = new BlockchainMap('_activeContracts');
         this._completedContracts = new BlockchainMap('_completedContracts');
+    }
+
+    /**
+     *
+     * @returns {{owner: boolean, ticker: string, emission: string, name: string, type: string}}
+     */
+    get contract() {
+        return {
+            name: 'ITST Token',
+            ticker: 'ITST',
+            owner: false,
+            emission: '0',
+            type: 'token',
+        };
+    }
+
+    /**
+     * Converts company ID 2 internal company ID
+     * @param companyId
+     * @returns {string}
+     * @private
+     */
+    _companyIdToInternalId(companyId) {
+        return 'company_' + companyId;
+    }
+
+    /**
+     * Mint tokens to company
+     * @param {string} companyId
+     * @param {string} amount
+     */
+    mintTokenForCompany(companyId, amount) {
+        companyId = this._companyIdToInternalId(companyId);
+        this._wallets.mint(companyId, amount);
+        this._MintEvent.emit(companyId, new BigNumber(amount));
+    }
+
+    /**
+     * Transfer tokens from company 2 company
+     * @param {string} company1
+     * @param {string} company2
+     * @param {string} amount
+     */
+    transferC2C(company1, company2, amount) {
+        company1 = this._companyIdToInternalId(company1);
+        company2 = this._companyIdToInternalId(company2);
+        this._wallets.transfer(company1, company2, amount);
+        this._TransferEvent.emit(company1, company2, new BigNumber(amount));
+    }
+
+    /**
+     * Get company balance
+     * @param companyId
+     * @returns {*}
+     */
+    getCompanyBalance(companyId) {
+        companyId = this._companyIdToInternalId(companyId);
+        return this.balanceOf(companyId);
     }
 
     /**
